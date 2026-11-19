@@ -1,0 +1,11 @@
+{
+  "extName": {
+    "message": "Cookie Mapper"
+  },
+  "extDescription": {
+    "message": "Copy and rename cookies between tabs using reusable URL patterns and rules."
+  },
+  "extAction": {
+    "message": "Cookie Mapper"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "extName": {
+    "message": "Cookie Mapper"
+  },
+  "extDescription": {
+    "message": "Copia y renombra cookies entre pestañas con patrones y reglas reutilizables."
+  },
+  "extAction": {
+    "message": "Cookie Mapper"
+  }
+}

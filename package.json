@@ -1,0 +1,17 @@
+{
+  "name": "cookie-mapper",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Privacy-first cookie mapping for Chromium development environments",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/copy-assets.mjs",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "python3 tests/smoke.py && python3 tests/domain_cookie.py && python3 tests/v04_e2e.py && python3 tests/v05_e2e.py && python3 tests/v06_e2e.py && python3 tests/i18n_e2e.py",
+    "package": "npm run build && python3 scripts/package_release.py",
+    "verify-release": "python3 scripts/verify_release.py"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

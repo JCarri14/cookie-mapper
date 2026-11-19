@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <title>Cookie Mapper</title>
+  <link rel="stylesheet" href="popup.css" />
+  <script src="popup.js" type="module" defer></script>
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <div class="brand"><div class="brand-icon" aria-hidden="true">C<span data-icon="arrow-up-right"></span></div><div><h1>Cookie Mapper</h1><p>Transferencias entre pestañas</p></div></div>
+      <div class="header-actions">
+        <label class="language-container" for="language-select" title="Idioma / Language"><span class="sr-only">Idioma / Language</span><select id="language-select" aria-label="Idioma / Language"><option value="es">ES</option><option value="en">EN</option></select></label>
+        <button id="mapping-menu-trigger" class="menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="mapping-menu">
+          <span data-icon="bookmark"></span>
+          Mapeos
+          <span data-icon="chevron-down" class="chevron"></span>
+        </button>
+        <div id="mapping-menu" class="mapping-menu hidden" role="menu" aria-label="Mapeos guardados">
+          <div class="menu-caption">MAPEOS GUARDADOS</div>
+          <div id="mapping-menu-list" class="menu-mappings"></div>
+          <div class="menu-divider"></div>
+          <button id="mapping-menu-create" type="button" role="menuitem" class="menu-action"><span class="menu-action-icon" data-icon="plus"></span> Crear nuevo mapeo</button>
+          <button id="mapping-menu-manage" type="button" role="menuitem" class="menu-action"><span class="menu-action-icon" data-icon="settings-2"></span> Administrar mapeos</button>
+        </div>
+      </div>
+    </header>
+
+    <div id="transfer-workspace">
+      <section class="panel tab-panel" aria-labelledby="tabs-title">
+        <div id="mapping-active" class="mapping-context hidden">
+          <span class="mapping-context-icon" aria-hidden="true" data-icon="check"></span>
+          <div class="context-text"><strong id="mapping-active-name"></strong><span id="mapping-active-meta"></span></div>
+          <button id="mapping-clear" type="button" class="context-dismiss" aria-label="Quitar mapeo y volver al modo manual" title="Volver a transferencia manual"><span data-icon="x"></span></button>
+        </div>
+        <div id="mapping-suggestion" class="mapping-suggestion hidden">
+          <div class="suggestion-content"><span class="suggestion-icon" aria-hidden="true" data-icon="sparkles"></span><span>Mapeo disponible: <strong id="mapping-suggestion-name"></strong></span></div>
+          <button type="button" id="mapping-apply-suggest" class="small-button">Aplicar</button>
+          <button type="button" id="mapping-dismiss-suggest" class="context-dismiss" aria-label="Ocultar sugerencia" title="Ocultar sugerencia"><span data-icon="x"></span></button>
+        </div>
+        <div class="section-heading"><h2 id="tabs-title">Selecciona las pestañas</h2>
+          <button id="refresh-tabs" class="icon-button" title="Actualizar pestañas" aria-label="Actualizar pestañas">
+            <span data-icon="refresh-cw"></span>
+          </button>
+        </div>
+        <label for="source-tab">Origen</label>
+        <div class="select-shell"><span class="end-dot source-dot" aria-hidden="true"></span><select id="source-tab" aria-label="Pestaña de origen"></select><span class="select-chevron" data-icon="chevron-down" aria-hidden="true"></span></div>
+        <div id="source-meta" class="tab-meta">Selecciona una pestaña.</div>
+        <div class="cookie-domain-field">
+          <label for="cookie-domain">Dominio de las cookies</label>
+          <input id="cookie-domain" type="text" autocomplete="off" spellcheck="false" placeholder="ejemplo.com" aria-describedby="domain-help" />
+          <p id="domain-help" class="help-text">Puede ser el dominio padre; sin protocolo, puerto ni punto inicial.</p>
+        </div>
+        <div class="transfer-divider"><span></span><span data-icon="arrow-down"></span><span></span></div>
+        <label for="target-tab">Destino</label>
+        <div class="select-shell"><span class="end-dot target-dot" aria-hidden="true"></span><select id="target-tab" aria-label="Pestaña de destino"></select><span class="select-chevron" data-icon="chevron-down" aria-hidden="true"></span></div>
+        <div id="target-meta" class="tab-meta">Selecciona una pestaña.</div>
+        <button class="button button-outline button-full" id="read-cookies">Leer cookies del origen</button>
+        <p class="help-text">Solicitaremos acceso a los dominios seleccionados. La lectura no copia ninguna cookie.</p>
+      </section>
+
+      <section class="panel cookies-panel" aria-labelledby="cookies-title">
+        <div class="section-heading"><div class="heading-line"><h2 id="cookies-title">Cookies</h2><span id="cookie-count" class="count">0</span></div><button id="toggle-all" class="text-button" disabled>Seleccionar todas</button></div>
+        <div id="cookie-toolbar" class="cookie-toolbar hidden"><div class="search-shell"><span data-icon="search"></span><input id="cookie-search" type="search" placeholder="Filtrar cookies…" aria-label="Filtrar cookies por nombre" autocomplete="off" spellcheck="false" /></div><span class="small-info">Key editable</span></div>
+        <div id="cookies-list" class="cookies-list"><div class="empty-state"><div class="empty-symbol" data-icon="cookie"></div><p>Sin cookies cargadas</p><span>Selecciona origen y destino y pulsa «Leer cookies».</span></div></div>
+      </section>
+
+      <section class="footer-panel">
+        <div class="summary-row"><span id="selection-count">0 seleccionadas</span><span class="privacy"><span class="privacy-dot"></span>100 % local</span></div>
+        <div class="save-current-row"><button id="mapping-update-current" type="button" class="save-current-button hidden" disabled><span data-icon="save"></span> Actualizar mapeo</button><button id="mapping-save-current" type="button" class="save-current-button" disabled><span data-icon="bookmark"></span>Guardar como mapeo</button></div>
+        <button id="copy-cookies" class="button button-primary button-full" disabled><span data-icon="copy"></span><span id="copy-label">Revisar transferencia</span></button>
+        <div id="preview-panel" class="preview-panel hidden"><div class="preview-header"><strong id="preview-title">Vista previa</strong><button id="preview-cancel" type="button" class="text-button">Cancelar</button></div><div id="preview-list" class="preview-list"></div><p class="help-text">Revisa el destino y los posibles reemplazos. Los valores permanecen ocultos.</p><button id="confirm-copy" class="button button-primary button-full">Confirmar copia</button></div>
+        <div id="notice" class="notice hidden" role="status" aria-live="polite"></div>
+        <div id="results" class="results hidden" aria-live="polite"></div>
+        <p class="footer-note">Las cookies nunca se guardan en perfiles. Las transferencias requieren confirmación. <span>v1.0.0</span></p>
+      </section>
+    </div>
+
+    <section id="mapping-workspace" class="panel management-workspace hidden" aria-label="Administración de mapeos">
+      <div id="mapping-manager">
+        <div class="manager-header"><button id="mapping-manager-back" type="button" class="back-button"><span aria-hidden="true" data-icon="arrow-left"></span> Volver</button><button id="mapping-manager-new" type="button" class="small-button"><span data-icon="plus"></span> Nuevo</button></div>
+        <h2 class="manager-title">Mis mapeos</h2>
+        <p class="manager-description">Utiliza mapeos para recuperar las pestañas, cookies y nombres de destino que sueles usar.</p>
+        <div id="mapping-manager-list" class="manager-list"></div>
+        <div id="mapping-delete-confirm" class="delete-confirm hidden" role="group" aria-label="Confirmar eliminación"><p id="mapping-delete-text"></p><div><button id="mapping-delete-cancel" type="button" class="small-button secondary">Cancelar</button><button id="mapping-delete-accept" type="button" class="small-button danger">Sí, eliminar</button></div></div>
+      </div>
+      <div id="mapping-editor" class="mapping-editor hidden">
+        <div class="manager-header"><button id="mapping-cancel" type="button" class="back-button"><span aria-hidden="true" data-icon="arrow-left"></span> Volver</button></div>
+        <div class="editor-title"><h2 id="mapping-editor-title" class="manager-title">Guardar mapeo</h2></div>
+        <label for="mapping-name">Nombre del mapeo</label>
+        <input id="mapping-name" class="field-input" type="text" maxlength="80" placeholder="Staging → Local" autocomplete="off" />
+        <label for="mapping-source">Patrón de origen</label>
+        <input id="mapping-source" class="field-input mono" type="text" spellcheck="false" autocomplete="off" placeholder="https://booking-{env}.example.test/**" />
+        <label for="mapping-destination">Patrón de destino</label>
+        <input id="mapping-destination" class="field-input mono" type="text" spellcheck="false" autocomplete="off" placeholder="http://localhost:5173/**" />
+        <label for="mapping-domain">Dominio de las cookies</label>
+        <input id="mapping-domain" class="field-input mono" type="text" spellcheck="false" autocomplete="off" placeholder="example.test" />
+        <p class="help-text">Captura variables con <code>{env}</code> <span>y rutas con</span> <code>**</code>. <span>Para regex avanzada usa</span> <code>re:^https://...$</code> <span>y grupos nombrados.</span></p>
+        <div id="mapping-test-result" class="pattern-test" role="status">Comprueba el patrón con la pestaña seleccionada.</div>
+        <button id="mapping-test" class="small-button secondary" type="button">Probar patrón</button>
+        <section class="rules-editor" aria-labelledby="mapping-rules-heading">
+          <div class="rules-heading"><h3 id="mapping-rules-heading">Reglas de cookies</h3><span id="mapping-rules-count" class="count">0</span></div>
+          <p class="help-text">Define qué key leer del origen y con qué nombre crearla en destino. Los valores nunca se guardan.</p>
+          <div class="rules-labels"><span>KEY ORIGEN</span><span>KEY DESTINO</span></div>
+          <div id="mapping-rules-list" class="rules-list"></div>
+          <div class="rules-actions">
+            <button id="mapping-rule-add" type="button" class="small-button secondary"><span data-icon="plus"></span> Añadir regla</button>
+            <button id="mapping-rule-import" type="button" class="small-button secondary"><span data-icon="list-plus"></span> Desde cookies leídas</button>
+          </div>
+          <div id="mapping-rule-picker" class="rule-picker hidden">
+            <div class="rule-picker-header"><strong>Cookies disponibles</strong><button id="mapping-rule-picker-close" type="button" class="icon-inline-button" aria-label="Cerrar selector"><span data-icon="x"></span></button></div>
+            <p class="help-text">Añade cookies detectadas en el origen. Puedes cambiar sus keys después.</p>
+            <div id="mapping-rule-available" class="rule-picker-list"></div>
+          </div>
+        </section>
+        <div id="mapping-form-error" class="form-error hidden" role="alert"></div>
+        <div class="editor-actions"><button type="button" id="mapping-delete" class="small-button danger hidden">Eliminar</button><span class="spacer"></span><button type="button" id="mapping-save" class="button button-primary">Guardar mapeo</button></div>
+        <p id="mapping-editor-note" class="help-text">Solo se guardan nombres de cookies, alias y patrones. Nunca sus valores.</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
